@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DompetKu — Anggaran Rumah Tangga</title>
+<meta name="description" content="Perencana anggaran rumah tangga: dasbor, kalkulator 50/30/20, pelacak pengeluaran vs patokan BPS, dan perencana target serta dana darurat. Semua dalam Rupiah, semua berjalan offline.">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="#/dashboard">🪙 DompetKu</a>
+    <p class="tagline">Anggaran Rumah Tangga</p>
+    <nav class="topnav" aria-label="Bagian situs">
+      <a href="#/dashboard" data-nav="dashboard" aria-current="page">Dasbor</a>
+      <a href="#/kalkulator" data-nav="kalkulator" aria-current="false">Kalkulator 50/30/20</a>
+      <a href="#/pelacak" data-nav="pelacak" aria-current="false">Pelacak Pengeluaran</a>
+      <a href="#/target" data-nav="target" aria-current="false">Target &amp; Dana Darurat</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- ============ 1. DASBOR ============ -->
+  <section id="section-dashboard" aria-labelledby="h-dashboard">
+    <h1 id="h-dashboard">Dasbor Anggaran Keluarga</h1>
+    <p class="lede">Contoh keluarga: <strong>Keluarga Budi — 2 dewasa + 2 anak, penghasilan Rp7.000.000/bulan</strong> (CONTOH, bukan statistik). Ubah penghasilannya di bawah — semua angka ikut berubah.</p>
+
+    <div class="stat-grid">
+      <div class="card stat"><span class="stat-label">Penghasilan</span><span class="stat-num" id="dash-income">Rp7.000.000</span><span class="stat-note" id="dash-income-note"></span></div>
+      <div class="card stat"><span class="stat-label">Total pengeluaran</span><span class="stat-num" id="dash-spent">Rp6.100.000</span><span class="stat-note">Dari pelacak pengeluaran</span></div>
+      <div class="card stat"><span class="stat-label">Sisa bulan ini</span><span class="stat-num" id="dash-remaining">Rp900.000</span><span class="stat-note">Penghasilan − pengeluaran</span></div>
+      <div class="card stat"><span class="stat-label">Tingkat tabungan</span><span class="stat-num" id="dash-rate">12,9%</span><span class="stat-note">Sisa ÷ penghasilan</span></div>
+    </div>
+
+    <p class="status ok" id="dash-status" role="status">Surplus Rp900.000 — masih ada sisa untuk ditabung bulan ini.</p>
+
+    <div class="two-col">
+      <div class="card">
+        <h2>Ke mana uangnya pergi?</h2>
+        <svg id="donut" viewBox="0 0 200 200" width="200" height="200" role="img" aria-label="Donat alokasi pengeluaran"></svg>
+        <ul class="legend">
+          <li><span class="dot dot-needs"></span>Kebutuhan <strong id="donut-needs"></strong></li>
+          <li><span class="dot dot-wants"></span>Keinginan <strong id="donut-wants"></strong></li>
+          <li><span class="dot dot-savings"></span>Sisa / tabungan <strong id="donut-savings"></strong></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Kenapa angka ini penting?</h2>
+        <p id="dash-bench-note"></p>
+        <p>Aturan 50/30/20 atas UMP Jakarta 2026: kebutuhan <strong>Rp2.864.938</strong> + keinginan <strong>Rp1.718.963</strong> + tabungan <strong>Rp1.145.975</strong> = <strong>Rp5.729.876</strong>. Coba hitung pembagianmu di <a href="#/kalkulator" data-nav="kalkulator">Kalkulator 50/30/20</a>.</p>
+        <p><a class="btn" href="#/pelacak" data-nav="pelacak">Lihat rincian pengeluaran →</a></p>
+      </div>
+    </div>
+
+    <div class="income-box card">
+      <label for="income-custom">Penghasilan bulanan (Rp)</label>
+      <input id="income-custom" type="text" inputmode="numeric" value="7000000" aria-describedby="income-presets">
+      <div id="income-presets" class="presets" aria-label="Preset penghasilan"></div>
+      <p class="hint">Preset UMP: Jakarta 2026 Rp5.729.876 (Pemprov DKI, Kepgub 1142/2025; +6,17% dari 2025 Rp5.396.761), Bali 2026 Rp3.207.459, Jawa Barat 2026 Rp2.317.601 (terendah dari 38 provinsi).</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. KALKULATOR 50/30/20 ============ -->
+  <section id="section-kalkulator" aria-labelledby="h-kalkulator" hidden>
+    <h1 id="h-kalkulator">Kalkulator 50/30/20</h1>
+    <p class="lede">Bagi penghasilanmu: <strong>50%</strong> kebutuhan, <strong>30%</strong> keinginan, <strong>20%</strong> tabungan. Geser slidernya — rupiahnya langsung berubah.</p>
+
+    <div class="card">
+      <label for="calc-income">Penghasilan bulanan (Rp)</label>
+      <input id="calc-income" type="text" inputmode="numeric" value="7000000">
+    </div>
+
+    <div class="calc-grid">
+      <div class="card calc-card">
+        <h2>Kebutuhan <span class="pct" id="calc-needs-pct-label">50%</span></h2>
+        <input id="calc-needs-pct" type="range" min="0" max="100" value="50" aria-label="Persen kebutuhan">
+        <p class="calc-amount" id="calc-needs-amount">Rp3.500.000</p>
+        <p class="calc-ideal">Patokan 50%: <span id="calc-ideal-needs">Rp3.500.000</span> · <span id="calc-needs-cmp">pas dengan patokan</span></p>
+        <div class="bar-track compare-track" id="bar-needs"></div>
+      </div>
+      <div class="card calc-card">
+        <h2>Keinginan <span class="pct" id="calc-wants-pct-label">30%</span></h2>
+        <input id="calc-wants-pct" type="range" min="0" max="100" value="30" aria-label="Persen keinginan">
+        <p class="calc-amount" id="calc-wants-amount">Rp2.100.000</p>
+        <p class="calc-ideal">Patokan 30%: <span id="calc-ideal-wants">Rp2.100.000</span> · <span id="calc-wants-cmp">pas dengan patokan</span></p>
+        <div class="bar-track compare-track" id="bar-wants"></div>
+      </div>
+      <div class="card calc-card">
+        <h2>Tabungan <span class="pct" id="calc-savings-pct-label">20%</span></h2>
+        <input id="calc-savings-pct" type="range" min="0" max="100" value="20" aria-label="Persen tabungan">
+        <p class="calc-amount" id="calc-savings-amount">Rp1.400.000</p>
+        <p class="calc-ideal">Patokan 20%: <span id="calc-ideal-savings">Rp1.400.000</span> · <span id="calc-savings-cmp">pas dengan patokan</span></p>
+        <div class="bar-track compare-track" id="bar-savings"></div>
+      </div>
+    </div>
+
+    <p class="status" id="calc-total-note"></p>
+    <p><button type="button" class="btn" id="calc-reset">Kembalikan ke 50/30/20</button></p>
+    <p class="hint">Batang hijau = pembagianmu; garis kuning = patokan 50/30/20. Contoh di atas UMP Jakarta 2026 (Rp5.729.876): kebutuhan Rp2.864.938, keinginan Rp1.718.963, tabungan Rp1.145.975.</p>
+  </section>
+
+  <!-- ============ 3. PELACAK PENGELUARAN ============ -->
+  <section id="section-pelacak" aria-labelledby="h-pelacak" hidden>
+    <h1 id="h-pelacak">Pelacak Pengeluaran</h1>
+    <p class="lede">Catat setiap pengeluaran bulanan. Totalnya langsung dibandingkan dengan patokan BPS 2025 — jadi ketahuan pengeluaranmu wajar atau tidak.</p>
+
+    <div class="stat-grid">
+      <div class="card stat"><span class="stat-label">Total bulan ini</span><span class="stat-num" id="tracker-total">Rp6.100.000</span><span class="stat-note" id="tracker-count">10 baris</span></div>
+      <div class="card stat"><span class="stat-label">Patokan BPS (4 orang)</span><span class="stat-num">Rp6.280.000</span><span class="stat-note">Susenas/BPS 2025, via GoodStats</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Daftar pengeluaran</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Nama</th><th>Kategori</th><th>Jumlah</th><th>Aksi</th></tr></thead>
+          <tbody id="expense-rows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 id="exp-form-title">Tambah pengeluaran</h2>
+      <form id="exp-form">
+        <div class="form-row">
+          <label>Nama pengeluaran
+            <input id="exp-name" type="text" placeholder="cth: Belanja bulanan" maxlength="80">
+          </label>
+          <label>Kategori
+            <select id="exp-category"></select>
+          </label>
+          <label>Jumlah (Rp)
+            <input id="exp-amount" type="text" inputmode="numeric" placeholder="cth: 500000">
+          </label>
+        </div>
+        <p class="error" id="exp-error" role="alert"></p>
+        <button type="submit" class="btn primary" id="exp-submit">Tambah pengeluaran</button>
+        <button type="button" class="btn" id="exp-cancel" hidden>Batalkan ubah</button>
+      </form>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <h2>Total per kategori</h2>
+        <div id="category-totals"></div>
+      </div>
+      <div class="card">
+        <h2>Kamu vs patokan BPS</h2>
+        <div id="benchmark-bars"></div>
+        <p class="hint" id="bench-source"></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Simpan datamu</h2>
+      <p>Data tersimpan otomatis di perangkat ini (kalau peramban mengizinkan). Kamu juga bisa mengunduh atau mengimpornya sebagai file JSON.</p>
+      <button type="button" class="btn" id="export-json">Unduh JSON</button>
+      <button type="button" class="btn" id="import-json">Impor JSON</button>
+      <input type="file" id="import-file" accept="application/json,.json" hidden>
+      <button type="button" class="btn danger" id="reset-data">Kembalikan ke contoh</button>
+      <p class="hint" id="import-note"></p>
+    </div>
+  </section>
+
+  <!-- ============ 4. TARGET & DANA DARURAT ============ -->
+  <section id="section-target" aria-labelledby="h-target" hidden>
+    <h1 id="h-target">Target &amp; Dana Darurat</h1>
+    <p class="lede">Rencanakan tabunganmu: berapa lama sampai target tercapai, dan berapa dana darurat yang ideal untuk keluargamu.</p>
+
+    <div class="two-col">
+      <div class="card">
+        <h2>Perencana target tabungan</h2>
+        <label>Nama target
+          <input id="goal-name" type="text" value="DP motor baru" maxlength="60">
+        </label>
+        <label>Target (Rp)
+          <input id="goal-target" type="text" inputmode="numeric" value="12000000">
+        </label>
+        <label>Tabungan per bulan (Rp)
+          <input id="goal-monthly" type="text" inputmode="numeric" value="500000">
+        </label>
+        <label>Sudah terkumpul (Rp)
+          <input id="goal-saved" type="text" inputmode="numeric" value="2000000">
+        </label>
+        <p class="status" id="goal-result" role="status"></p>
+      </div>
+      <div class="card">
+        <h2>Dana darurat</h2>
+        <p>Pengeluaran bulananmu sekarang: <strong id="emergency-spent">Rp6.100.000</strong> (dari pelacak).</p>
+        <label>Sudah terkumpul (Rp)
+          <input id="emergency-saved" type="text" inputmode="numeric" value="3500000">
+        </label>
+        <h3>3× pengeluaran — <span id="emg3-target">Rp18.300.000</span></h3>
+        <div class="bar-track"><div class="bar-fill emg" id="emg3-bar" style="width:19%"></div></div>
+        <p id="emg3-left">Kurang Rp14.800.000 · 19%</p>
+        <h3>6× pengeluaran — <span id="emg6-target">Rp36.600.000</span></h3>
+        <div class="bar-track"><div class="bar-fill emg" id="emg6-bar" style="width:10%"></div></div>
+        <p id="emg6-left">Kurang Rp33.100.000 · 10%</p>
+        <p class="hint">3× cukup untuk lajang tanpa tanggungan; 6× lebih aman untuk keluarga dengan anak.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>5 tips yang langsung bisa dipakai</h2>
+      <ol class="tips" id="tips-list"></ol>
+      <p class="hint" id="poverty-note"></p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>DompetKu</strong> — perencana anggaran rumah tangga. Semua angka acuan ditampilkan bersama sumber + tahunnya. Keluarga Budi adalah contoh, bukan statistik. Situs ini berjalan sepenuhnya offline: tanpa jaringan, tanpa pelacak, tanpa akun.</p>
+    <p>Sumber angka: UMP 2026 (Pemprov DKI, Kepgub 1142/2025; PP 49/2025) · Pengeluaran rata-rata &amp; garis kemiskinan (BPS Susenas 2025; BPS Maret 2025).</p>
+  </div>
+</footer>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
